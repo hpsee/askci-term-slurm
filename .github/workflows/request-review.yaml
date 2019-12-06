@@ -1,0 +1,62 @@
+name: request-review
+
+on: [repository_dispatch]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v1
+    - name: Update README.md
+      run: |
+        jq --raw-output .client_payload.markdown "${GITHUB_EVENT_PATH}" > README.md
+        cat README.md
+    - name: Checkout New Branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        USERNAME=$(jq --raw-output .client_payload.username "${GITHUB_EVENT_PATH}");
+        echo "Requested by ${USERNAME}"
+        echo "GitHub Actor: ${GITHUB_ACTOR}"
+        git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git branch
+        git checkout -b update/term-${USERNAME}-$(date '+%Y-%m-%d')
+        git branch
+
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@users.noreply.github.com"
+
+        git add README.md
+        git commit -m "Request review of term by $USERNAME $(date '+%Y-%m-%d')" --allow-empty
+        git push origin update/term-${USERNAME}-$(date '+%Y-%m-%d')
+    - name: Open pull request
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH_AGAINST: "master"
+      run: |
+          USERNAME=$(jq --raw-output .client_payload.username "${GITHUB_EVENT_PATH}");
+          export BRANCH_FROM="update/term-${USERNAME}-$(date '+%Y-%m-%d')"
+          /bin/bash .github/workflows/pull-request.sh;
+          if [ -f "PR_RESPONSE.json" ]; then
+            URL=$(jq --raw-output .url "PR_RESPONSE.json");
+            TITLE=$(jq --raw-output .title "PR_RESPONSE.json");
+            PR_ID=$(jq --raw-output .client_payload.id "${GITHUB_EVENT_PATH}");
+            RESPONSE_URL=$(jq --raw-output .client_payload.url "${GITHUB_EVENT_PATH}");
+            ARTICLE=$(jq --raw-output .client_payload.article "${GITHUB_EVENT_PATH}");
+            BRANCH=$(jq --raw-output .head.ref PR_RESPONSE.json);
+            REQUEST_USER=$USERNAME
+            OWNER=${GITHUB_ACTOR}
+            # if the url is not localhost or 127.0.0.1, send update to callback url
+            if [[ $RESPONSE_URL != *"localhost"* ]] && [[ $RESPONSE_URL != *"127.0.0.1"* ]]; then
+                AUTH_HEADER="Authorization: Bearer ${PR_ID}"
+                DATA="{\"article\":\"${ARTICLE}\", \"branch\":\"${BRANCH}\", \"title\":\"${TITLE}\", \"owner\":\"${OWNER}\", \"user\":\"${REQUEST_USER}\",  \"url\":\"${URL}\"}"
+                curl -sSL -H "${AUTH_HEADER}" -H "User-Agent: AskCI" --user "${GITHUB_ACTOR}" -X POST --data "${DATA}" ${RESPONSE_URL} -o ASKCI_RESPONSE.json
+                echo $?
+                cat ASKCI_RESPONSE.json
+            else
+                echo "Development server, skip sending response."
+            fi
+          fi
