@@ -18,7 +18,7 @@ import re
 import sys
 
 # The README.md must exist
-root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print('Root of repository is %s' % root)
 
 readme = os.path.join(root, 'README.md')
@@ -44,7 +44,7 @@ for span in soup.find_all("span"):
     # The span is required to have an id
     identifier = span.attrs.get('id')
     if not identifier:
-        sys.exit('Span %s is missing an identifier.')
+        sys.exit('Span %s is missing an identifier.' % span)
 
     # The span id must start with a valid prefix
     if not re.search(prefix_regex, identifier):

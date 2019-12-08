@@ -20,6 +20,46 @@ REPO_URL="${BASE}/repos/${GITHUB_REPOSITORY}"
 PULLS_URL=$REPO_URL/pulls
 
 ################################################################################
+# LOGIC TO INTERACT WITH REPOSITORY - set here since we cannot update .yml
+################################################################################
+
+event_name=$(jq --raw-output .client_payload.event_name "${GITHUB_EVENT_PATH}");
+if [ "${event_name}" != "${EVENT_NAME}" ]; then
+    echo "Dispatch Event is not intended to update template"
+    exit 0;
+fi
+TEMPLATE_REPO=$(jq --raw-output .client_payload.template_repo "${GITHUB_EVENT_PATH}")
+# If the repository name is the upstream template, don't run
+if [ "${GITHUB_REPOSITORY}" == "${TEMPLATE_REPO}" ]; then
+    echo "This is the template, will not edit."
+    exit 0;
+fi
+# Checkout template to tmp, move files
+git clone "${TEMPLATE_REPO}" /tmp/template
+
+# We aren't allowed to edit workflows
+cp /tmp/template/.github/*.sh .github/
+cp /tmp/template/.github/*.py .github/
+
+# Open pull request to update template;
+echo "GitHub Actor: ${GITHUB_ACTOR}";
+export BRANCH_FROM="update/template-$(date '+%Y-%m-%d')";
+
+git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git";
+git branch;
+git checkout -b "${BRANCH_FROM}";
+git branch;
+git config --global user.name "github-actions";
+git config --global user.email "github-actions@users.noreply.github.com";
+git add .github/*.sh;
+git add .github/*.py;
+ls .github/
+echo "Git Status:"
+git status
+git commit -m "Update from template ${TEMPLATE_REPO} $(date '+%Y-%m-%d')" --allow-empty;
+git push origin "${BRANCH_FROM}";
+
+################################################################################
 # Helper Functions
 ################################################################################
 
@@ -48,14 +88,8 @@ create_pull_request() {
     SOURCE="${1}"  # from this branch
     TARGET="${2}"  # pull request TO this target
 
-    # The calling function can export the title or body
-    if [ -z "${TITLE}" ]; then
-        TITLE="'Request for Term Update Review'"
-    fi
-    if [ -z "${BODY}" ]; then
-        BODY='This is a pull request to request review for changes to the term README.md.'
-    fi
-
+    TITLE="Update from upstream knowledge repository template";
+    BODY="This is a pull request to update from the upstream template.";
     DATA="{\"base\":\"${TARGET}\", \"head\":\"${SOURCE}\", \"body\":\"${BODY}\"}"
     RESPONSE=$(curl -sSL -H "${AUTH_HEADER}" -H "${HEADER}" --user "${GITHUB_ACTOR}" -X GET --data "${DATA}" ${PULLS_URL})
     PR=$(echo "${RESPONSE}" | jq --raw-output '.[] | .head.ref')

@@ -26,4 +26,4 @@ jobs:
           source activate askci
           
           # run tests
-          python .github/workflows/test_markdown.py
+          python .github/test_markdown.py
