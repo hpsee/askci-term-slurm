@@ -1,72 +1,72 @@
-# term
-
-<!--
-    This is a comment block that won't show up in rendered markdown.
-    The header above should have the term you are defining, where term is the 
-    concept or term that this documentation is about.
--->
-
-<!--
-    How to work on this file?
-    1. You can update and request review for this file when you are authenticated
-       from the AskCI server term page
-    2. You can also update the file as you would with git, if the repository
-       is connected a merge to master will update the server.
-    3. See https://vsoch.github.io/askci/docs/respository-spec for more details
--->
-
+# slurm
 
 ## Definition
 
-Term refers to...
+<span id='question-what-does-slurm-mean'></span> SLURM refers to the "Simple Linux Utility for Resource Management" and is a job manager for high performance computing.
 
-<!--
-    The sections are up to you! All levels will be parsed into the page.
-    For example, you might have Definition, History, Usage, or longer
-    section names to ask a question or state an idea.
--->
+## Commands
 
-## History
+### Quick Start
 
-How would we direct a user to a question about the term history?
-Here is an example of a question embedded into the text, not that it
-starts with "question" to indicate being a question, and that all letters
-are lowercase and separated with "-" and no spaces. The GitHub
-checks provided will ensure this is maintained with each push to master.
-When the server imports the updated content, it will discover this question
-and index it.
+<span id='question-what-are-commands-to-get-started-with-slurm'></span> It's sometimes easiest to get started by trying out some commands.
 
-<span id="question-where-does-term-originate"></span>"Term" was first used
-when someone wrote it in this GitHub repository. That someone might have
-been a dinosaur.
+What Jobs are currently running?
+```bash
+qstat
+```
+
+What Jobs am I currently running?
+
+```bash
+qstat -u username
+```
+
+Launch an interactive session on one node with 16 cores:
+```bash
+qrsh -pe omp 16
+```
+
+Launch a batch job one node with 16 cores:
+```bsah
+qsub -pe omp 16 script.sh``
+```
+
+Cancel a batch job
+```bash
+qdel -j jobID
+```
+
+Cancel all my jobs
+
+```bash
+qdel -u username
+```
 
 ## Examples
 
-It's helpful to provide examples for the user, and we can do this in several ways:
+Here are a few more detailed examples
 
- - code blocks labeled with spans
- - files in an included `examples` folder in the repository referenced with a relative link
- - external urls included in links with an id that starts with "example-"
+### Batch Scripts
 
-Currently, we just support the first - using a single embedded code block, and 
-I'll be added the other two use cases as more testing and feedback is given.
+Example batch file with directives that reserve one node in the default queue, with 16 cores and exclusive use of the node:
 
-### Code blocks
-
-Here is a code block that is labeled as an example. The AskCI server will index the
-location in the text, and also extract the example in the next code block. You
-are limited to one code block for this case.
-
-<span id="example-how-to-embed-example-in-code-block"></span>
+<span id="example-sbatch-with-one-node-default-queue"></span>
 ```bash
-echo "This is an example"
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 16
+#SBATCH --time=1:00:00
+#SBATCH --exclusive
+<<shell commands that set up and run the job>>
 ```
 
 
 ## References
 
-<!--
-    Here is what a reference might look like.
--->
+<span id='question-how-do-i-transition-from-sun-grid-engine-to-slurm'></span>
 
+
+ - [SGE to SLURM Max Planck](https://www.mpcdf.mpg.de/services/computing/linux/migration-from-sge-to-slurm)
+ - [SGE to SLURM Converstion from Stanford](https://srcc.stanford.edu/sge-slurm-conversion)
  - [AskCI Site](https://ask.ci)
+
