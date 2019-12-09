@@ -45,7 +45,6 @@ for filename in $(ls -p /tmp/template/.github/ | grep -v /); do
 done
 
 # Open pull request to update template
-echo "GitHub Actor: ${GITHUB_ACTOR}";
 export BRANCH_FROM="update/template-$(date '+%Y-%m-%d')";
 
 git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git";
@@ -54,8 +53,7 @@ git checkout -b "${BRANCH_FROM}";
 git branch;
 git config --global user.name "github-actions";
 git config --global user.email "github-actions@users.noreply.github.com";
-git add .github/*.sh;
-git add .github/*.py;
+git add .github/;
 git status;
 git commit -m "Update from template ${TEMPLATE_REPO} $(date '+%Y-%m-%d')" --allow-empty;
 git push origin "${BRANCH_FROM}";
@@ -123,16 +121,16 @@ main () {
         echo "You must specify a branch to PR from.";
         exit 1;
     fi
-    echo "Branch for pull request is $BRANCH_FROM"
+    echo "Branch for pull request is $BRANCH_FROM";
 
     if [ -z "${BRANCH_AGAINST}" ]; then
-        BRANCH_AGAINST=master
+        BRANCH_AGAINST=master;
     fi
-    echo "Pull request will go against ${BRANCH_AGAINST}"
+    echo "Pull request will go against ${BRANCH_AGAINST}";
 
     # Ensure we have a GitHub token
-    check_credentials
-    create_pull_request $BRANCH_FROM $BRANCH_AGAINST
+    check_credentials;
+    create_pull_request $BRANCH_FROM $BRANCH_AGAINST;
 
 }
 
