@@ -24,6 +24,7 @@ PULLS_URL=$REPO_URL/pulls
 ################################################################################
 
 event_name=$(jq --raw-output .client_payload.event_name "${GITHUB_EVENT_PATH}");
+echo "Comparing ${event_name} with ${EVENT_NAME}"
 if [ "${event_name}" != "${EVENT_NAME}" ]; then
     echo "Dispatch Event is not intended to update template"
     exit 0;
