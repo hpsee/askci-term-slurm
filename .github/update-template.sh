@@ -38,9 +38,9 @@ fi
 git clone "${TEMPLATE_REPO}" /tmp/template;
 
 # We aren't allowed to edit workflows
-ls /tmp/template/;
 ls /tmp/template/.github/;
-cp /tmp/template/.github/* .github/;
+cp /tmp/template/.github/*.sh .github/;
+cp /tmp/template/.github/*.py .github/;
 
 # Open pull request to update template
 echo "GitHub Actor: ${GITHUB_ACTOR}";
