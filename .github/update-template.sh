@@ -24,7 +24,6 @@ PULLS_URL=$REPO_URL/pulls
 ################################################################################
 
 event_name=$(jq --raw-output .client_payload.event_name "${GITHUB_EVENT_PATH}");
-echo "Comparing ${event_name} with ${EVENT_NAME}"
 if [ "${event_name}" != "${EVENT_NAME}" ]; then
     echo "Dispatch Event is not intended to update template"
     exit 0;
@@ -32,15 +31,15 @@ fi
 TEMPLATE_REPO=$(jq --raw-output .client_payload.template_repo "${GITHUB_EVENT_PATH}")
 # If the repository name is the upstream template, don't run
 if [ "${GITHUB_REPOSITORY}" == "${TEMPLATE_REPO}" ]; then
-    echo "This is the template, will not edit."
+    echo "This is the template, will not edit.";
     exit 0;
 fi
 # Checkout template to tmp, move files
-git clone "${TEMPLATE_REPO}" /tmp/template
+git clone "${TEMPLATE_REPO}" /tmp/template;
 
 # We aren't allowed to edit workflows
-cp /tmp/template/.github/*.sh .github/
-cp /tmp/template/.github/*.py .github/
+cp -R /tmp/template/.github/*.sh .github/;
+cp -R /tmp/template/.github/*.py .github/;
 
 # Open pull request to update template;
 echo "GitHub Actor: ${GITHUB_ACTOR}";
@@ -120,8 +119,8 @@ main () {
 
     # User specified branch for PR
     if [ -z "${BRANCH_FROM}" ]; then
-        echo "You must specify a branch to PR from."
-        exit 1
+        echo "You must specify a branch to PR from.";
+        exit 1;
     fi
     echo "Branch for pull request is $BRANCH_FROM"
 
@@ -137,7 +136,7 @@ main () {
 }
 
 echo "==========================================================================
-START: Creating Review Request Pull Request!";
+START: Updating Template Request!";
 main;
 echo "==========================================================================
 END: Finished";
