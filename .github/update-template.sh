@@ -56,8 +56,6 @@ git config --global user.name "github-actions";
 git config --global user.email "github-actions@users.noreply.github.com";
 git add .github/*.sh;
 git add .github/*.py;
-ls .github/;
-echo "Git Status:";
 git status;
 git commit -m "Update from template ${TEMPLATE_REPO} $(date '+%Y-%m-%d')" --allow-empty;
 git push origin "${BRANCH_FROM}";
