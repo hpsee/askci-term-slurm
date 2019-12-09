@@ -38,11 +38,11 @@ fi
 git clone "${TEMPLATE_REPO}" /tmp/template;
 
 # We aren't allowed to edit workflows
-ls /tmp/template/
-ls /tmp/template/.github/
+ls /tmp/template/;
+ls /tmp/template/.github/;
 cp -R /tmp/template/.github/* .github/;
 
-# Open pull request to update template;
+# Open pull request to update template
 echo "GitHub Actor: ${GITHUB_ACTOR}";
 export BRANCH_FROM="update/template-$(date '+%Y-%m-%d')";
 
@@ -54,9 +54,9 @@ git config --global user.name "github-actions";
 git config --global user.email "github-actions@users.noreply.github.com";
 git add .github/*.sh;
 git add .github/*.py;
-ls .github/
-echo "Git Status:"
-git status
+ls .github/;
+echo "Git Status:";
+git status;
 git commit -m "Update from template ${TEMPLATE_REPO} $(date '+%Y-%m-%d')" --allow-empty;
 git push origin "${BRANCH_FROM}";
 
