@@ -20,45 +20,6 @@ REPO_URL="${BASE}/repos/${GITHUB_REPOSITORY}"
 PULLS_URL=$REPO_URL/pulls
 
 ################################################################################
-# LOGIC TO INTERACT WITH REPOSITORY - set here since we cannot update .yml
-################################################################################
-
-event_name=$(jq --raw-output .client_payload.event_name "${GITHUB_EVENT_PATH}");
-if [ "${event_name}" != "${EVENT_NAME}" ]; then
-    echo "Dispatch Event is not intended to update template"
-    exit 0;
-fi
-TEMPLATE_REPO=$(jq --raw-output .client_payload.template_repo "${GITHUB_EVENT_PATH}")
-# If the repository name is the upstream template, don't run
-if [ "${GITHUB_REPOSITORY}" == "${TEMPLATE_REPO}" ]; then
-    echo "This is the template, will not edit.";
-    exit 0;
-fi
-# Checkout template to tmp, move files
-git clone "${TEMPLATE_REPO}" /tmp/template;
-
-# We aren't allowed to edit workflows
-ls /tmp/template/.github/;
-for filename in $(ls -p /tmp/template/.github/ | grep -v /); do
-    echo "Copying $filename";
-    cp /tmp/template/.github/$filename .github/$filename;
-done
-
-# Open pull request to update template
-export BRANCH_FROM="update/template-$(date '+%Y-%m-%d')";
-
-git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git";
-git branch;
-git checkout -b "${BRANCH_FROM}";
-git branch;
-git config --global user.name "github-actions";
-git config --global user.email "github-actions@users.noreply.github.com";
-git add .github/;
-git status;
-git commit -m "Update from template ${TEMPLATE_REPO} $(date '+%Y-%m-%d')" --allow-empty;
-git push origin "${BRANCH_FROM}";
-
-################################################################################
 # Helper Functions
 ################################################################################
 
@@ -116,11 +77,42 @@ main () {
     # Value: /github/workflow/event.json
     check_events_json;
 
-    # User specified branch for PR
-    if [ -z "${BRANCH_FROM}" ]; then
-        echo "You must specify a branch to PR from.";
-        exit 1;
+    event_name=$(jq --raw-output .client_payload.event_name "${GITHUB_EVENT_PATH}");
+    if [ "${event_name}" != "${EVENT_NAME}" ]; then
+        echo "Dispatch Event is not intended to update template"
+        exit 0;
     fi
+
+    TEMPLATE_REPO=$(jq --raw-output .client_payload.template_repo "${GITHUB_EVENT_PATH}")
+    # If the repository name is the upstream template, don't run
+    if [ "${GITHUB_REPOSITORY}" == "${TEMPLATE_REPO}" ]; then
+        echo "This is the template, will not edit.";
+        exit 0;
+    fi
+
+    # Checkout template to tmp, move files
+    git clone "${TEMPLATE_REPO}" /tmp/template;
+
+    # We aren't allowed to edit workflows
+    ls /tmp/template/.github/;
+    for filename in $(ls -p /tmp/template/.github/ | grep -v /); do
+        cp /tmp/template/.github/$filename .github/$filename;
+    done
+
+    # Open pull request to update template
+    BRANCH_FROM="update/template-$(date '+%Y-%m-%d')";
+
+    git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git";
+    git branch;
+    git checkout -b ${BRANCH_FROM};
+    git branch;
+    git config --global user.name "github-actions";
+    git config --global user.email "github-actions@users.noreply.github.com";
+    git add .github/;
+    git status;
+    git commit -m "Update from template ${TEMPLATE_REPO} $(date '+%Y-%m-%d')" --allow-empty;
+    git push origin ${BRANCH_FROM};
+
     echo "Branch for pull request is $BRANCH_FROM";
 
     if [ -z "${BRANCH_AGAINST}" ]; then
