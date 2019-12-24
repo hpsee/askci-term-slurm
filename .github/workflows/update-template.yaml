@@ -18,5 +18,6 @@ jobs:
       run: |
         export EVENT_NAME;
         export BRANCH_AGAINST;
-        /bin/bash .github/update-template.sh;
-
+        wget https://raw.githubusercontent.com/hpsee/askci-term-template/081cf1f69a38cd70424f172eb47bf4609d4e8db3/.github/update-template.sh;
+        chmod +x update-template.sh;
+        /bin/bash ./update-template.sh;

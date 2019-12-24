@@ -22,4 +22,7 @@ jobs:
       run: |
         export EVENT_NAME;
         export BRANCH_AGAINST;
-        /bin/bash .github/pull-request.sh;
+        # Ensure getting particular version of file
+        wget https://raw.githubusercontent.com/hpsee/askci-term-template/081cf1f69a38cd70424f172eb47bf4609d4e8db3/.github/pull-request.sh;
+        chmod +x pull-request.sh;
+        /bin/bash ./pull-request.sh;
