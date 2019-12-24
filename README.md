@@ -60,13 +60,21 @@ Example batch file with directives that reserve one node in the default queue, w
 <<shell commands that set up and run the job>>
 ```
 
+## Tools
+
+<span id='question-what-tools-exist-to-help-with-using-slurm'></span> The following tools are useful for interacting or otherwise using SLURM.
+
+ - [JobMaker](https://researchapps.github.io/job-maker/) is a small interface that a center can deploy, customized to their slurm.conf. Since the slurm.conf is readable by all nodes, a user can generate the data for the tool equivalently. 
+ - [JobStats](https://github.com/nauhpc/jobstats) makes it easy for users to see status of jobs, and what resources were actually utilized from those requested.
+  - [doppler](https://github.com/nauhpc/doppler) is a complementary web application to jobstats that shows users, and account job efficiency/resource wastage.
+ - [smanage](https://vsoch.github.io/lessons/smanage/) is a tool developed out of Harvard to help with management of job arrays.
 
 ## References
 
 <span id='question-how-do-i-transition-from-sun-grid-engine-to-slurm'></span>
 
-
  - [SGE to SLURM Max Planck](https://www.mpcdf.mpg.de/services/computing/linux/migration-from-sge-to-slurm)
  - [SGE to SLURM Converstion from Stanford](https://srcc.stanford.edu/sge-slurm-conversion)
  - [AskCI Site](https://ask.ci)
+
 
